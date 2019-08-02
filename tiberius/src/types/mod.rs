@@ -319,6 +319,8 @@ impl<'a> ColumnData<'a> {
                 FixedLenType::Int2 => ColumnData::I16(trans.inner.read_i16::<LittleEndian>()?),
                 FixedLenType::Int4 => ColumnData::I32(trans.inner.read_i32::<LittleEndian>()?),
                 FixedLenType::Int8 => ColumnData::I64(trans.inner.read_i64::<LittleEndian>()?),
+                FixedLenType::Float4 => ColumnData::F32(trans.inner.read_f32::<LittleEndian>()?),
+                FixedLenType::Float8 => ColumnData::F64(trans.inner.read_f64::<LittleEndian>()?),
                 FixedLenType::Datetime => parse_datetimen(trans, 8)?,
                 FixedLenType::Datetime4 => parse_datetimen(trans, 4)?,
                 _ => panic!("unsupported fixed type decoding: {:?}", fixed_ty),

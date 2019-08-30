@@ -533,7 +533,7 @@ struct InnerSqlConnection<I: BoxableIo> {
 pub struct SqlConnection<I: BoxableIo>(InnerSqlConnection<I>);
 
 /// The authentication method that should be used during authentication
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 #[allow(non_camel_case_types)]
 pub enum AuthMethod {
     SqlServer(Cow<'static, str>, Cow<'static, str>),
@@ -545,6 +545,7 @@ pub enum AuthMethod {
 }
 
 /// Settings for the connection, everything that isn't IO/transport specific (e.g. authentication)
+#[derive(Debug, Clone)]
 pub struct ConnectParams {
     pub host: Cow<'static, str>,
     pub ssl: EncryptionLevel,
@@ -583,14 +584,14 @@ pub trait BoxableIo: Io + Send {}
 impl<I: Io + Send> BoxableIo for I {}
 
 /// A dynamic connection target
-#[derive(PartialEq, Debug)]
-enum ConnectTarget {
+#[derive(PartialEq, Debug, Clone)]
+pub enum ConnectTarget {
     Tcp(SocketAddr),
     TcpViaSQLBrowser(SocketAddr, String),
 }
 
 impl ConnectTarget {
-    fn connect(self) 
+    pub fn connect(self) 
         -> Box<Future<Item = Box<BoxableIo>, Error = Error> + Sync + Send>
     {
         match self {
@@ -644,7 +645,7 @@ impl ConnectTarget {
 
 /// Parse connection strings
 /// https://msdn.microsoft.com/de-de/library/system.data.sqlclient.sqlconnection.connectionstring(v=vs.110).aspx
-fn parse_connection_str(connection_str: &str) -> Result<(ConnectParams, ConnectTarget)>
+pub fn parse_connection_str(connection_str: &str) -> Result<(ConnectParams, ConnectTarget)>
 { 
     let mut connect_params = ConnectParams::new();
     let mut target: Option<ConnectTarget> = None;
